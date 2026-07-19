@@ -4,9 +4,14 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, maximum-scale=1">
 <meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Henry">
 <meta name="theme-color" content="#2B3A2E">
 <title>Du schaffst das! 🎓🐾</title>
+<link rel="manifest" href="manifest.json">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<link rel="icon" type="image/png" href="icon-192.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=Kalam:wght@400;700&family=Quicksand:wght@500;600;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="style.css">
@@ -24,6 +29,10 @@
     <span class="eyebrow">STAATSEXAMEN COUNTDOWN</span>
     <h1>Du schaffst das, <span class="accent" id="nameSlot">Celine</span>! 🎓</h1>
     <p class="subline">Drei Prüfungen, ein Ziel — und eine treue Pfote an deiner Seite.</p>
+    <div class="progress-chip" id="progressChip" aria-live="polite">
+      <div class="progress-dots" id="progressDots" aria-hidden="true"></div>
+      <span id="progressText">Noch keine Prüfung geschafft — aber das ändert sich bald! 🎓</span>
+    </div>
   </header>
 
   <section class="countdowns" id="countdowns" aria-label="Countdown zu den Prüfungen"></section>
@@ -44,33 +53,79 @@
     </form>
   </details>
 
+  <section class="goals" aria-label="Heutige Lernziele">
+    <div class="goals-head">
+      <span class="goals-title">📝 Heutige Lernziele</span>
+      <span class="goals-count" id="goalsCount"></span>
+    </div>
+    <form class="goals-form" id="goalForm">
+      <input type="text" id="goalInput" placeholder="Was nimmst du dir für heute vor?" maxlength="80" autocomplete="off" aria-label="Neues Lernziel">
+      <button type="submit" class="goals-add" aria-label="Lernziel hinzufügen">+</button>
+    </form>
+    <ul class="goals-list" id="goalsList"></ul>
+    <p class="goals-empty" id="goalsEmpty">Trag ein, was du dir für heute vornimmst — und hak es ab, wenn du’s geschafft hast. 💪</p>
+  </section>
+
   <section class="scene-wrap">
+    <button class="skin-btn" id="skinBtn" type="button" aria-label="Henrys Kleiderhaken – Skins auswählen" aria-haspopup="dialog">🧥</button>
     <div class="speech-bubble" id="bubble">Klick auf mich für Motivation! 🐾</div>
 
     <div class="stage">
       <div class="ground"></div>
-      <div class="dog" id="dog" role="button" tabindex="0" aria-label="Streichel den Hund für Motivation">
+      <div class="dog" id="dog" data-skin="standard" role="button" tabindex="0" aria-label="Streichel den Hund für Motivation">
+        <!-- Champion-Glow (liegt hinter allem) -->
+        <div class="acc acc-glow" aria-hidden="true"></div>
+        <!-- Superhelden-Umhang (hinter dem Körper) -->
+        <div class="acc acc-cape" aria-hidden="true"></div>
         <div class="d-tail"></div>
         <div class="d-body"></div>
+        <!-- Champion-Talar über dem Körper -->
+        <div class="acc acc-robe" aria-hidden="true"></div>
         <div class="d-chest"></div>
         <div class="d-paw left"></div>
         <div class="d-paw right"></div>
+        <!-- Buch-Requisite (Bücherwurm) -->
+        <div class="acc acc-book" aria-hidden="true"><span class="pages"></span></div>
+        <!-- Ranke (Pflanzen) -->
+        <div class="acc acc-vine" aria-hidden="true"><span class="lf a"></span><span class="lf b"></span><span class="lf c"></span></div>
+        <!-- Dalapferd-Anhänger (Schweden) -->
+        <div class="acc acc-dala" aria-hidden="true"></div>
+        <!-- Bronze-Medaille -->
+        <div class="acc acc-medal" aria-hidden="true"><span class="ribbon"></span><span class="coin">1</span></div>
+        <!-- Fliege (Lehrer) -->
+        <div class="acc acc-bowtie" aria-hidden="true"></div>
+        <!-- Zeigestock (Lehrer) -->
+        <div class="acc acc-pointer" aria-hidden="true"></div>
         <div class="d-scarf"><div class="band"></div><div class="knot"></div></div>
         <div class="d-head">
           <div class="d-cap">
-            <div class="cap-tassel"></div>
+            <div class="cap-side"></div>
             <div class="cap-top"></div>
             <div class="cap-board"></div>
             <div class="cap-btn"></div>
+            <div class="cap-tassel"><span class="tassel-fringe"></span></div>
           </div>
+          <!-- Blätterkranz (Pflanzen) -->
+          <div class="acc acc-leafcrown" aria-hidden="true">
+            <span class="leaf"></span><span class="leaf"></span><span class="leaf"></span>
+            <span class="leaf"></span><span class="leaf"></span><span class="leaf"></span><span class="leaf"></span>
+          </div>
+          <!-- Krone (Champion) -->
+          <div class="acc acc-crown" aria-hidden="true"><span class="gem"></span></div>
           <div class="d-ear left"></div>
           <div class="d-ear right"></div>
           <div class="d-face"></div>
           <div class="d-wrinkle w1"></div>
           <div class="d-wrinkle w2"></div>
           <div class="d-wrinkle w3"></div>
+          <!-- Augenmaske (Superheld) -->
+          <div class="acc acc-mask" aria-hidden="true"></div>
           <div class="d-eye left"></div>
           <div class="d-eye right"></div>
+          <!-- Runde Lesebrille (Bücherwurm) -->
+          <div class="acc acc-glasses round" aria-hidden="true"><span class="lens l"></span><span class="lens r"></span><span class="bridge"></span></div>
+          <!-- Eckige Brille (Lehrer) -->
+          <div class="acc acc-glasses square" aria-hidden="true"><span class="lens l"></span><span class="lens r"></span><span class="bridge"></span></div>
           <div class="d-snout"></div>
           <div class="d-nose"></div>
           <div class="d-tongue"></div>
@@ -79,6 +134,19 @@
     </div>
     <p class="hint" id="dogName">— Henry, dein treuester Fan —</p>
   </section>
+
+  <!-- Skin-Auswahl (Kleiderhaken) -->
+  <div class="skin-modal" id="skinModal" role="dialog" aria-modal="true" aria-labelledby="skinModalTitle" hidden>
+    <div class="skin-backdrop" id="skinBackdrop"></div>
+    <div class="skin-panel" role="document">
+      <div class="skin-panel-head">
+        <h2 id="skinModalTitle">Henrys Kleiderhaken 🧥</h2>
+        <button class="skin-close" id="skinClose" type="button" aria-label="Schließen">✕</button>
+      </div>
+      <p class="skin-sub">Such Henry ein Outfit aus. Gesperrte Skins schaltest du frei, indem du Prüfungen als bestanden markierst. 🎓</p>
+      <div class="skin-grid" id="skinGrid"><!-- Kacheln werden per ui.js gerendert --></div>
+    </div>
+  </div>
 
   <section class="power-wrap">
     <div class="power-label">
@@ -96,12 +164,21 @@
   </div>
 
   <footer>
-    <div class="paws">🐾 🐾 <span class="dala">🐴</span> 🐾 🐾</div>
+    <div class="paws">🐾 🐾 <span class="dala">🐶</span> 🐾 🐾</div>
     <p id="signature">Ich drück dir ganz fest die Daumen — du bist bereit für das hier.</p>
   </footer>
 </main>
 
 <script src="app.js"></script>
 <script src="ui.js"></script>
+<script>
+  // PWA: Service Worker registrieren (nur über https/GitHub Pages aktiv,
+  // lokal per Doppelklick oder ohne https wird still übersprungen).
+  if ('serviceWorker' in navigator) {
+    window.addEventListener('load', () => {
+      navigator.serviceWorker.register('sw.js').catch(() => {});
+    });
+  }
+</script>
 </body>
 </html>

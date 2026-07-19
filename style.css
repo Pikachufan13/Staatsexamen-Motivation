@@ -4,6 +4,8 @@
   --board-2:#37493A;
   --paper:#F6EFE0;         /* Kraftpapier / Karteikarten */
   --chalk:#F4EFE1;
+  --fur-white:#FBF6EC;     /* Fell-Weiß von Henry, entkoppelt von der Tafel-Farbe */
+  --fur-shade:#E7DCC7;     /* leichter Schatten fürs Fell-Weiß (statt Transparenz) */
   --wood:#8A5A3B;          /* Bleistift-/Holzton */
   --wood-dark:#6B4227;
   --light:#E8B34A;         /* Lichterkette / warmes Gelb */
@@ -97,6 +99,28 @@ h1{
 }
 h1 .accent{ color: var(--light); }
 .subline{ font-family:'Kalam', cursive; font-size: 1.1rem; color: var(--sage); margin: 0; }
+
+/* Gesamt-Fortschritt (motivierender Chip unter der Subline) */
+.progress-chip{
+  display:inline-flex; align-items:center; gap:10px;
+  margin-top: 16px; padding: 8px 16px;
+  background: var(--board-2); border: 2px dashed var(--line);
+  border-radius: 999px;
+  font-family:'Quicksand', sans-serif; font-size: 0.86rem; color: var(--chalk);
+}
+.progress-chip.is-complete{
+  border-style: solid; border-color: rgba(232,179,74,0.6);
+  background: linear-gradient(120deg, rgba(232,179,74,0.18), var(--board-2));
+}
+.progress-dots{ display:inline-flex; gap:6px; }
+.progress-dots .pdot{
+  width:12px; height:12px; border-radius:50%;
+  border: 2px solid var(--sage); background: transparent;
+  transition: background .2s ease, border-color .2s ease, transform .2s ease;
+}
+.progress-dots .pdot.filled{
+  background: var(--light); border-color: var(--light); transform: scale(1.08);
+}
 
 /* ---------- Countdown-Karten ---------- */
 .countdowns{ display:grid; grid-template-columns: 1fr; gap: 14px; margin: 28px 0 8px; }
@@ -278,8 +302,9 @@ h1 .accent{ color: var(--light); }
 }
 .d-chest{
   position:absolute; bottom: 10px; left:50%; transform: translateX(-50%);
-  width: 58px; height: 50px; background: var(--chalk);
-  border-radius: 50%; opacity: .95;
+  width: 58px; height: 50px;
+  background: radial-gradient(ellipse at 50% 30%, var(--fur-white), var(--fur-shade));
+  border-radius: 50%; opacity: 1;
 }
 .d-paw{
   position:absolute; bottom: 6px; width: 28px; height: 18px;
@@ -355,25 +380,31 @@ h1 .accent{ color: var(--light); }
 .d-wrinkle.w2{ top: 22px; right: 24px; width: 34px; transform: rotate(4deg); }
 .d-wrinkle.w3{ top: 30px; left: 50%; transform: translateX(-50%); width: 26px; }
 
+/* Schwarze Schnauze/Maske (typisch French Bulldog) */
 .d-snout{
   position:absolute; bottom: 8px; left:50%; transform: translateX(-50%);
-  width: 60px; height: 42px; background: var(--chalk);
-  border-radius: 44% 44% 50% 50%; opacity:.96;
+  width: 60px; height: 42px;
+  background: radial-gradient(ellipse at 50% 28%, #3a2f29, #211812 70%, #170f0b);
+  border-radius: 44% 44% 50% 50%; opacity:1;
+  box-shadow: inset 0 3px 0 -1px rgba(255,255,255,0.06);
 }
 .d-snout::before, .d-snout::after{
-  /* Backen/Jowls */
+  /* Backen/Jowls (ebenfalls dunkel, mit sanftem Rand zum Fell) */
   content:""; position:absolute; bottom:-4px; width: 20px; height: 20px;
-  background: var(--chalk); border-radius: 50%; opacity:.9;
+  background: radial-gradient(circle at 50% 35%, #322721, #1c140f);
+  border-radius: 50%; opacity:1;
 }
 .d-snout::before{ left:-6px; } .d-snout::after{ right:-6px; }
 .d-nose{
   position:absolute; bottom: 46px; left:50%; transform: translateX(-50%);
-  width: 22px; height: 15px; background: #241713;
+  width: 24px; height: 16px; background: #0f0a07;
   border-radius: 40% 40% 60% 60%;
+  /* Glanz oben + Absetzung nach unten -> Nase hebt sich von der Schnauze ab */
+  box-shadow: inset 0 3px 2px rgba(255,255,255,0.22), inset 0 -2px 2px rgba(0,0,0,0.5), 0 1px 2px rgba(0,0,0,0.4);
 }
 .d-nose::after{
-  content:""; position:absolute; top:50%; left:50%; transform: translate(-50%,-30%);
-  width: 3px; height: 6px; background: #4a3226; border-radius: 2px;
+  content:""; position:absolute; top:52%; left:50%; transform: translate(-50%,-30%);
+  width: 3px; height: 6px; background: #2e211a; border-radius: 2px;
 }
 .d-eye{
   position:absolute; top: 40px; width: 12px; height: 14px;
@@ -397,31 +428,58 @@ h1 .accent{ color: var(--light); }
   50%{ transform: translateX(-50%) rotate(2.5deg); }
 }
 
-/* Highschool-Doktorhut: mittig auf dem Kopf, zwischen den Ohren */
+/* Doktorhut (Mortarboard): mittig auf dem Kopf, zwischen den Ohren, plastisch 3D */
 .d-cap{
-  position:absolute; top: -14px; left: 50%;
-  transform: translateX(-50%) rotate(-4deg);
-  width: 84px; height: 26px; z-index: 4;
+  position:absolute; top: -20px; left: 50%;
+  transform: translateX(-50%) rotate(-3deg);
+  width: 84px; height: 34px; z-index: 4;
+  /* Schlagschatten nach unten -> Hut liegt sichtbar auf dem Kopf auf */
+  filter: drop-shadow(0 5px 3px rgba(0,0,0,0.38));
 }
+/* Kopfband/Kappe, die den Schädel umschließt und aufliegt */
 .cap-board{
-  position:absolute; top: 13px; left: 12px;
-  width: 60px; height: 8px; background:#221A16;
-  border-radius: 2px;
+  position:absolute; top: 15px; left: 50%; transform: translateX(-50%);
+  width: 52px; height: 17px;
+  background: linear-gradient(180deg, #3c2f28 0%, #241a15 70%, #1a1310 100%);
+  border-radius: 0 0 42% 42% / 0 0 100% 100%;
+  box-shadow: inset 0 3px 0 -1px rgba(255,255,255,0.10);
 }
+/* Seitenfläche = "Dicke" des Bretts (etwas tiefer & dunkler als die Oberseite) */
+.cap-side{
+  position:absolute; top: 12px; left: 50%;
+  width: 46px; height: 46px;
+  transform: translateX(-50%) rotate(45deg);
+  background: #150f0c;
+  border-radius: 5px;
+}
+/* Oberseite des Bretts mit Licht(oben-links)->Schatten(unten-rechts)-Verlauf */
 .cap-top{
-  position:absolute; top: -6px; left: 22px;
-  width: 42px; height: 42px; background:#2C2320;
-  transform: rotate(45deg); border-radius: 3px;
-  box-shadow: inset 0 0 0 2px rgba(0,0,0,0.2);
+  position:absolute; top: 6px; left: 50%;
+  width: 46px; height: 46px;
+  transform: translateX(-50%) rotate(45deg);
+  background: linear-gradient(135deg, #52413704 0%, #4a3a31 8%, #2c221d 50%, #1b1411 100%);
+  border-radius: 5px;
+  box-shadow: inset 1.5px 1.5px 0 rgba(255,255,255,0.14), inset -2px -2px 0 rgba(0,0,0,0.28);
 }
-.cap-btn{ position:absolute; top: 15px; left: 40px; width:6px; height:6px; border-radius:50%; background: var(--light); }
+.cap-btn{
+  position:absolute; top: 11px; left: 50%; transform: translateX(-50%);
+  width:8px; height:8px; border-radius:50%;
+  background: radial-gradient(circle at 35% 30%, #ffe6a6, var(--light));
+  box-shadow: 0 0 4px rgba(232,179,74,0.6); z-index:2;
+}
 .cap-tassel{
-  position:absolute; top: 17px; left: 44px; width: 2px; height: 24px;
-  background: var(--light); transform-origin: top center;
-  animation: tassel 2.6s ease-in-out infinite;
+  position:absolute; top: 13px; left: 50%; width: 2px; height: 27px;
+  background: linear-gradient(180deg, #f0c368, var(--light));
+  transform-origin: top center;
+  animation: tassel 2.6s ease-in-out infinite; z-index:2;
 }
-.cap-tassel::after{ content:""; position:absolute; bottom:-4px; left:-2px; width:6px;height:6px; background: var(--light); border-radius:50%; }
-@keyframes tassel{ 0%,100%{ transform: rotate(6deg); } 50%{ transform: rotate(-4deg); } }
+.tassel-fringe{
+  position:absolute; bottom:-7px; left:-3px; width:8px; height:11px;
+  background: linear-gradient(180deg, var(--light), #c98f2f);
+  border-radius: 3px 3px 5px 5px;
+  box-shadow: 0 1px 2px rgba(0,0,0,0.25);
+}
+@keyframes tassel{ 0%,100%{ transform: rotate(7deg); } 50%{ transform: rotate(-5deg); } }
 
 .heart{
   position:absolute; font-size: 18px; pointer-events:none;
@@ -485,3 +543,335 @@ footer{ text-align:center; margin-top: 44px; color: var(--sage); font-family:'Ka
 }
 
 :focus-visible{ outline: 3px solid var(--light); outline-offset: 2px; }
+
+/* ====================================================================
+   Prüfungs-Datum unter dem Countdown
+   ==================================================================== */
+.exam-date{
+  font-family:'Quicksand', sans-serif; font-size: 0.78rem;
+  color: var(--sage); letter-spacing: .3px; margin-top: 8px;
+  display:flex; align-items:center; gap:6px;
+}
+.exam-date::before{ content:"📅"; font-size:.85rem; }
+
+/* ====================================================================
+   SKIN-SYSTEM — Zubehör (acc-*) & data-skin-Steuerung
+   ==================================================================== */
+
+/* Alle Zubehör-Teile sind standardmäßig unsichtbar. */
+.acc{ display:none; position:absolute; pointer-events:none; }
+
+/* Standard-Henry: Halstuch wandert komplett zum Schweden-Skin,
+   also im Normalfall ausblenden. */
+.d-scarf{ display:none; }
+.dog[data-skin="schweden"] .d-scarf{ display:block; }
+
+/* Doktorhut nur bei standard, schweden und bronze zeigen. */
+.dog[data-skin="buecherwurm"] .d-cap,
+.dog[data-skin="pflanzen"]   .d-cap,
+.dog[data-skin="superheld"]  .d-cap,
+.dog[data-skin="lehrer"]     .d-cap,
+.dog[data-skin="champion"]   .d-cap{ display:none; }
+
+/* Welche Zubehör-Teile pro Skin sichtbar sind. */
+.dog[data-skin="buecherwurm"] .acc-glasses.round,
+.dog[data-skin="buecherwurm"] .acc-book,
+.dog[data-skin="pflanzen"]    .acc-leafcrown,
+.dog[data-skin="pflanzen"]    .acc-vine,
+.dog[data-skin="schweden"]    .acc-dala,
+.dog[data-skin="bronze"]      .acc-medal,
+.dog[data-skin="superheld"]   .acc-cape,
+.dog[data-skin="superheld"]   .acc-mask,
+.dog[data-skin="lehrer"]      .acc-bowtie,
+.dog[data-skin="lehrer"]      .acc-glasses.square,
+.dog[data-skin="lehrer"]      .acc-pointer,
+.dog[data-skin="champion"]    .acc-robe,
+.dog[data-skin="champion"]    .acc-crown,
+.dog[data-skin="champion"]    .acc-glow{ display:block; }
+
+/* Schweden: Hut-Quaste & Knopf in Gelb */
+.dog[data-skin="schweden"] .cap-tassel{ background: linear-gradient(180deg,#fff0b0,var(--se-yellow)); }
+.dog[data-skin="schweden"] .tassel-fringe{ background: linear-gradient(180deg,var(--se-yellow),#d9ad06); }
+.dog[data-skin="schweden"] .cap-btn{ background: radial-gradient(circle at 35% 30%, #fff4c2, var(--se-yellow)); box-shadow:0 0 4px rgba(254,204,2,0.6); }
+
+/* ---- Bücherwurm: Buch neben der Pfote ---- */
+.acc-book{
+  bottom: 2px; left: 2px; width: 40px; height: 30px;
+  background: linear-gradient(180deg,#8a5533,#5e3720);
+  border-radius: 3px; transform: rotate(-9deg);
+  box-shadow: 0 3px 4px rgba(0,0,0,0.32);
+}
+.acc-book .pages{
+  position:absolute; inset: 4px 3px 3px 6px;
+  background: repeating-linear-gradient(180deg,#f4ecd8 0 4px,#ddceac 4px 5px);
+  border-radius: 1px 3px 3px 1px;
+}
+.acc-book::after{ /* Buchrücken */
+  content:""; position:absolute; top:0; bottom:0; left:0; width:6px;
+  background:#4a2c19; border-radius:3px 0 0 3px;
+}
+
+/* ---- Pflanzen: Ranke am Körper + Blätterkranz auf dem Kopf ---- */
+.acc-vine{ bottom: 16px; left: 30px; width: 6px; height: 66px; background: linear-gradient(180deg,#7fb488,#4f855f); border-radius: 4px; transform: rotate(7deg); }
+.acc-vine .lf{ position:absolute; width:15px; height:10px; background: linear-gradient(180deg,#8fc298,#57905f); border-radius: 0 100% 0 100%; }
+.acc-vine .lf.a{ top:6px; left:5px; }
+.acc-vine .lf.b{ top:26px; left:-13px; transform: scaleX(-1); }
+.acc-vine .lf.c{ top:46px; left:5px; }
+.acc-leafcrown{ top:-4px; left:50%; transform:translateX(-50%); width:126px; height:30px; }
+.acc-leafcrown .leaf{ position:absolute; top:12px; width:20px; height:12px; background: linear-gradient(180deg,#8fc298,#4f855f); border-radius: 0 100% 0 100%; }
+.acc-leafcrown .leaf:nth-child(1){ left:2px;  top:20px; transform: rotate(-55deg); }
+.acc-leafcrown .leaf:nth-child(2){ left:16px; top:10px; transform: rotate(-35deg); }
+.acc-leafcrown .leaf:nth-child(3){ left:34px; top:3px;  transform: rotate(-16deg); }
+.acc-leafcrown .leaf:nth-child(4){ left:53px; top:0px;  transform: rotate(0deg); }
+.acc-leafcrown .leaf:nth-child(5){ left:72px; top:3px;  transform: rotate(16deg) scaleX(-1); }
+.acc-leafcrown .leaf:nth-child(6){ left:90px; top:10px; transform: rotate(35deg) scaleX(-1); }
+.acc-leafcrown .leaf:nth-child(7){ left:104px;top:20px; transform: rotate(55deg) scaleX(-1); }
+
+/* ---- Schweden: Dalapferd-Anhänger auf der Brust ---- */
+.acc-dala{
+  bottom: 30px; left:50%; transform: translateX(-50%);
+  width: 24px; height: 26px; background: var(--se-blue);
+  clip-path: polygon(6% 100%, 6% 64%, 20% 64%, 22% 50%, 40% 50%, 44% 26%,
+                     60% 8%, 74% 2%, 80% 12%, 70% 26%, 64% 40%, 82% 44%,
+                     92% 56%, 92% 72%, 78% 72%, 78% 100%, 64% 100%, 64% 72%,
+                     44% 72%, 44% 100%, 30% 100%, 30% 72%, 20% 72%, 20% 100%);
+}
+.acc-dala::after{ content:""; position:absolute; top:50%; left:38%; width:36%; height:14%; background: var(--se-yellow); border-radius:2px; }
+
+/* ---- Bronze-Medaille auf der Brust ---- */
+.acc-medal{ bottom: 30px; left:50%; transform: translateX(-50%); width: 30px; height: 48px; }
+.acc-medal .ribbon{
+  position:absolute; top:0; left:50%; transform:translateX(-50%);
+  width:22px; height:22px;
+  background: linear-gradient(90deg,var(--se-blue) 0 50%, var(--se-yellow) 50% 100%);
+  clip-path: polygon(0 0,100% 0,100% 62%,50% 100%,0 62%);
+}
+.acc-medal .coin{
+  position:absolute; bottom:0; left:50%; transform:translateX(-50%);
+  width:28px; height:28px; border-radius:50%;
+  background: radial-gradient(circle at 35% 30%, #f0b878, #cd7f32 58%, #9c5a20);
+  border:2px solid #b06c28;
+  display:flex; align-items:center; justify-content:center;
+  font-family:'Press Start 2P',monospace; font-size:10px; color:#5a3311;
+  box-shadow: 0 2px 3px rgba(0,0,0,0.38);
+}
+
+/* ---- Superheld: Umhang (hinter dem Körper) + Augenmaske ---- */
+.acc-cape{
+  bottom: 4px; left:50%; transform: translateX(-50%);
+  width: 150px; height: 118px;
+  background: linear-gradient(180deg,#d94b3b,#a3291f);
+  clip-path: polygon(20% 0, 80% 0, 100% 100%, 50% 86%, 0 100%);
+  box-shadow: inset 0 0 16px rgba(0,0,0,0.22);
+}
+.acc-mask{
+  top:30px; left:50%; transform: translateX(-50%);
+  width: 106px; height: 28px;
+  background: linear-gradient(180deg,#2f3f9e,#1d2a6b);
+  clip-path: polygon(0 18%,50% 0,100% 18%,100% 66%,72% 100%,50% 74%,28% 100%,0 66%);
+}
+
+/* ---- Lehrer: Fliege + eckige Brille + Zeigestock ---- */
+.acc-bowtie{
+  bottom: 60px; left:50%; transform: translateX(-50%);
+  width: 36px; height: 16px;
+  background: radial-gradient(circle at 50% 50%, #4a1717 0 4px, transparent 4px);
+}
+.acc-bowtie::before, .acc-bowtie::after{
+  content:""; position:absolute; top:0; width:16px; height:16px;
+  background: linear-gradient(180deg,#9a3b3b,#6e2626);
+}
+.acc-bowtie::before{ left:0;  clip-path: polygon(0 0,100% 50%,0 100%); }
+.acc-bowtie::after{  right:0; clip-path: polygon(100% 0,0 50%,100% 100%); }
+.acc-pointer{
+  bottom: 6px; right: 2px; width: 5px; height: 76px;
+  background: linear-gradient(180deg,#b9814a,#7a4a2e);
+  border-radius: 3px; transform: rotate(22deg); transform-origin: bottom center;
+}
+.acc-pointer::after{ content:""; position:absolute; top:-3px; left:-1px; width:7px; height:7px; border-radius:50%; background:#f4ecd8; }
+
+/* ---- Champion: Talar + Krone + Glow-Ring ---- */
+.acc-robe{
+  bottom: 8px; left:50%; transform: translateX(-50%);
+  width: 132px; height: 78px;
+  background: linear-gradient(180deg,#3f3861,#241f3a);
+  border-radius: 46% 46% 40% 40% / 60% 60% 40% 40%;
+  box-shadow: inset 0 -12px 0 -4px #1a1630;
+}
+.acc-robe::before{ /* goldener V-Kragen */
+  content:""; position:absolute; top:-2px; left:50%; transform:translateX(-50%);
+  width: 40px; height: 40px;
+  background: linear-gradient(180deg,#f4d06a,var(--gold));
+  clip-path: polygon(50% 100%, 0 0, 100% 0);
+}
+.acc-crown{
+  top:-16px; left:50%; transform:translateX(-50%);
+  width: 62px; height: 32px;
+  background: linear-gradient(180deg,#ffe08a,var(--gold));
+  clip-path: polygon(0 100%,0 42%,20% 72%,35% 18%,50% 60%,65% 18%,80% 72%,100% 42%,100% 100%);
+  box-shadow: inset 0 -7px 0 -3px #c9962f; z-index:5;
+}
+.acc-crown .gem{ position:absolute; bottom:3px; left:50%; transform:translateX(-50%); width:9px; height:9px; border-radius:50%; background: radial-gradient(circle at 35% 30%,#ff8a7a,#d1483a); }
+.acc-glow{
+  bottom: 8px; left:50%; transform: translateX(-50%);
+  width: 196px; height: 196px; border-radius:50%;
+  background: radial-gradient(circle, rgba(232,179,74,0) 44%, rgba(232,179,74,0.30) 58%, rgba(232,179,74,0) 72%);
+  animation: glow-pulse 3s ease-in-out infinite;
+}
+.acc-glow::before, .acc-glow::after{
+  content:"✦"; position:absolute; color: var(--gold); font-size:16px;
+  filter: drop-shadow(0 0 4px rgba(232,179,74,0.8));
+  animation: glow-twinkle 2.4s ease-in-out infinite;
+}
+.acc-glow::before{ top:12%; left:16%; }
+.acc-glow::after{ top:22%; right:14%; animation-delay: 1.1s; }
+@keyframes glow-pulse{ 0%,100%{ opacity:.75; transform: translateX(-50%) scale(1); } 50%{ opacity:1; transform: translateX(-50%) scale(1.05); } }
+@keyframes glow-twinkle{ 0%,100%{ opacity:.3; transform: scale(0.7); } 50%{ opacity:1; transform: scale(1.1); } }
+
+/* ---- Glasses (rund = Bücherwurm, eckig = Lehrer) ---- */
+.acc-glasses{ top:34px; left:6px; width:120px; height:26px; z-index:3; }
+.acc-glasses .lens{ position:absolute; top:0; width:24px; height:22px; border:3px solid #2a1c15; background: rgba(205,228,238,0.20); }
+.acc-glasses .lens.l{ left:20px; }
+.acc-glasses .lens.r{ left:76px; }
+.acc-glasses .bridge{ position:absolute; top:9px; left:44px; width:32px; height:3px; background:#2a1c15; }
+.acc-glasses.round .lens{ border-radius:50%; }
+.acc-glasses.square .lens{ border-radius:4px; }
+
+/* ====================================================================
+   SKIN-BUTTON (Kleiderhaken) & MODAL
+   ==================================================================== */
+.skin-btn{
+  position:absolute; top:12px; right:12px; z-index:6;
+  width:46px; height:46px; border-radius:50%;
+  border:2px solid var(--line); background: var(--board); color: var(--chalk);
+  font-size:22px; cursor:pointer; line-height:1;
+  display:flex; align-items:center; justify-content:center;
+  box-shadow: 0 3px 0 rgba(0,0,0,0.28);
+  transition: transform .12s ease, box-shadow .12s ease;
+}
+.skin-btn:hover{ background: var(--board-2); }
+.skin-btn:active{ transform: translateY(2px); box-shadow: 0 1px 0 rgba(0,0,0,0.28); }
+/* dezenter Hinweis, dass hier etwas Neues freigeschaltet wurde */
+.skin-btn.has-new::after{
+  content:""; position:absolute; top:-2px; right:-2px;
+  width:14px; height:14px; border-radius:50%;
+  background: var(--light); border:2px solid var(--board);
+  animation: badge-pop .3s ease;
+}
+@keyframes badge-pop{ 0%{ transform: scale(0); } 60%{ transform: scale(1.25); } 100%{ transform: scale(1); } }
+
+.skin-modal{
+  position:fixed; inset:0; z-index:1000;
+  display:flex; align-items:center; justify-content:center;
+  padding: max(16px, var(--safe-t)) 14px max(16px, var(--safe-b));
+}
+.skin-modal[hidden]{ display:none; }
+.skin-backdrop{ position:absolute; inset:0; background: rgba(18,26,20,0.68); -webkit-backdrop-filter: blur(3px); backdrop-filter: blur(3px); }
+.skin-panel{
+  position:relative; z-index:1; width:100%; max-width:520px;
+  max-height: 88vh; overflow-y:auto; -webkit-overflow-scrolling: touch;
+  background: var(--board-2); border:2px solid var(--line);
+  border-radius:18px; padding:18px 16px 20px;
+  box-shadow: 0 18px 44px rgba(0,0,0,0.5);
+  animation: panel-in .24s ease;
+}
+@keyframes panel-in{ 0%{ transform: translateY(14px) scale(.98); opacity:0; } 100%{ transform: none; opacity:1; } }
+.skin-panel-head{ display:flex; align-items:center; justify-content:space-between; gap:10px; }
+.skin-panel-head h2{ font-family:'Kalam', cursive; font-size:1.35rem; margin:0; color: var(--chalk); }
+.skin-close{
+  width:44px; height:44px; border-radius:12px; border:2px solid var(--line);
+  background: var(--board); color: var(--sage); font-size:1.1rem; cursor:pointer;
+  display:flex; align-items:center; justify-content:center;
+}
+.skin-close:active{ transform: translateY(1px); }
+.skin-sub{ font-family:'Quicksand',sans-serif; font-size:0.86rem; color: var(--sage); margin:8px 0 4px; line-height:1.5; }
+
+.skin-grid{ display:grid; grid-template-columns:1fr; gap:10px; margin-top:14px; }
+@media (min-width:460px){ .skin-grid{ grid-template-columns:1fr 1fr; } }
+
+.skin-tile{
+  text-align:left; background: var(--board); color: var(--chalk);
+  border:2px solid var(--line); border-radius:14px; padding:12px 14px;
+  cursor:pointer; display:flex; gap:12px; align-items:center; min-height:66px;
+  font-family:'Quicksand',sans-serif; position:relative;
+  transition: transform .1s ease, border-color .12s ease;
+}
+.skin-tile:active{ transform: scale(0.985); }
+.skin-tile.is-active{ border-color: var(--light); box-shadow: inset 0 0 0 2px rgba(232,179,74,0.35); }
+.skin-tile.is-locked{ opacity:0.55; cursor: not-allowed; }
+.skin-tile .tile-emoji{ font-size:26px; width:38px; min-width:38px; text-align:center; }
+.skin-tile .tile-body{ flex:1; }
+.skin-tile .tile-name{ font-weight:700; font-size:0.98rem; display:flex; align-items:center; gap:6px; }
+.skin-tile .tile-hint{ font-size:0.76rem; color: var(--sage); margin-top:3px; line-height:1.35; }
+.skin-tile .tile-lock{ font-size:0.95rem; opacity:.85; }
+.skin-tile .tile-badge{
+  font-family:'Quicksand',sans-serif; font-size:0.6rem; font-weight:700;
+  letter-spacing:.5px; text-transform:uppercase;
+  color: var(--board); background: var(--light);
+  padding:2px 6px; border-radius:6px; margin-left:auto; align-self:flex-start;
+}
+.skin-tile.is-active .tile-badge{ background: var(--sage); }
+.skin-tile.is-locked .tile-badge{ background: transparent; color: var(--sage); border:1px solid var(--sage); }
+
+/* Mini-Henry statt Emoji in freigeschalteten Kacheln */
+.skin-tile .tile-emoji.has-dog{
+  width:58px; min-width:58px; height:60px; position:relative; overflow:hidden;
+  border-radius:10px; background: rgba(0,0,0,0.18);
+}
+.skin-tile .tile-emoji .dog.mini{
+  position:absolute; left:50%; bottom:-8px; margin:0;
+  transform: translateX(-50%) scale(.26); transform-origin: bottom center;
+  cursor:default; pointer-events:none; animation:none;
+}
+.skin-tile .tile-emoji .dog.mini *{ animation:none !important; }
+
+/* ====================================================================
+   TAGES-LERNZIELE
+   ==================================================================== */
+.goals{
+  background: var(--board-2); border:2px dashed var(--line);
+  border-radius:12px; padding:14px 16px 16px; margin:6px 0 10px;
+}
+.goals-head{ display:flex; align-items:baseline; justify-content:space-between; gap:10px; }
+.goals-title{ font-family:'Kalam',cursive; font-size:1.02rem; color:var(--light); }
+.goals-count{ font-family:'Quicksand',sans-serif; font-size:.8rem; color:var(--sage); font-variant-numeric: tabular-nums; }
+.goals-count.is-complete{ color: var(--light); }
+.goals-form{ display:flex; gap:8px; margin-top:12px; }
+.goals-form input{
+  flex:1; min-width:0; font-family:'Quicksand',sans-serif; font-size:1rem;
+  padding:11px 12px; border-radius:8px; border:2px solid var(--line);
+  background:rgba(0,0,0,0.15); color:var(--chalk); min-height:44px;
+}
+.goals-form input:focus{ border-color:var(--light); outline:none; }
+.goals-add{
+  min-width:44px; min-height:44px; border-radius:8px; border:none;
+  background:var(--light); color:var(--board); font-size:1.5rem; font-weight:700;
+  cursor:pointer; line-height:1;
+}
+.goals-add:active{ transform:translateY(1px); }
+.goals-list{ list-style:none; margin:12px 0 0; padding:0; display:flex; flex-direction:column; gap:8px; }
+.goals-list:empty{ display:none; }
+.goal-item{
+  display:flex; align-items:center; gap:10px; min-height:44px;
+  background:rgba(0,0,0,0.12); border-radius:10px; padding:6px 6px 6px 10px;
+  animation: pop .18s ease;
+}
+.goal-check{
+  appearance:none; -webkit-appearance:none; width:24px; height:24px; min-width:24px;
+  border-radius:7px; border:2px solid var(--sage); background:transparent;
+  cursor:pointer; position:relative;
+}
+.goal-check:checked{ background:var(--light); border-color:var(--light); }
+.goal-check:checked::after{
+  content:"✓"; position:absolute; inset:0; display:flex; align-items:center;
+  justify-content:center; color:var(--board); font-weight:700; font-size:15px;
+}
+.goal-text{ flex:1; font-family:'Quicksand',sans-serif; font-size:.95rem; color:var(--chalk); word-break:break-word; }
+.goal-item.is-done .goal-text{ text-decoration:line-through; color:var(--sage); opacity:.8; }
+.goal-remove{
+  background:none; border:none; color:var(--sage); opacity:.7; font-size:1rem;
+  cursor:pointer; min-width:40px; min-height:40px;
+}
+.goal-remove:active{ transform: translateY(1px); }
+.goals-empty{ font-family:'Kalam',cursive; color:var(--sage); font-size:.9rem; margin:12px 2px 2px; }
+.goals-empty[hidden]{ display:none; }

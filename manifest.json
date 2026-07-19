@@ -1,0 +1,17 @@
+{
+  "name": "Du schaffst das, Celine!",
+  "short_name": "Henry",
+  "description": "Motivations-App fürs Staatsexamen mit Countdown und Henry der Bulldogge.",
+  "start_url": ".",
+  "scope": ".",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#2B3A2E",
+  "theme_color": "#2B3A2E",
+  "lang": "de",
+  "icons": [
+    { "src": "icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
+    { "src": "icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" },
+    { "src": "icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+  ]
+}

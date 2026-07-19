@@ -1,0 +1,60 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+  <defs>
+    <radialGradient id="face" cx="50%" cy="38%" r="66%">
+      <stop offset="0%" stop-color="#D68C61"/>
+      <stop offset="100%" stop-color="#C9835F"/>
+    </radialGradient>
+    <radialGradient id="snout" cx="50%" cy="28%" r="72%">
+      <stop offset="0%" stop-color="#3a2f29"/>
+      <stop offset="70%" stop-color="#211812"/>
+      <stop offset="100%" stop-color="#160f0b"/>
+    </radialGradient>
+    <linearGradient id="hat" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#4a3a31"/>
+      <stop offset="0.5" stop-color="#2c221d"/>
+      <stop offset="1" stop-color="#160f0b"/>
+    </linearGradient>
+  </defs>
+
+  <!-- Schwedische Flagge -->
+  <rect width="512" height="512" fill="#006AA7"/>
+  <rect x="0" y="221" width="512" height="70" fill="#FECC02"/>
+  <rect x="200" y="0" width="70" height="512" fill="#FECC02"/>
+
+  <!-- Ohren -->
+  <g fill="#6E3F29">
+    <path d="M172 236 C150 150 152 112 192 142 C206 154 206 202 196 236 Z"/>
+    <path d="M340 236 C362 150 360 112 320 142 C306 154 314 202 316 236 Z"/>
+  </g>
+  <g fill="#8B5236">
+    <path d="M180 230 C164 166 166 136 192 156 C202 166 202 200 192 230 Z"/>
+    <path d="M332 230 C348 166 346 136 320 156 C310 166 310 200 320 230 Z"/>
+  </g>
+
+  <!-- Kopf -->
+  <ellipse cx="256" cy="316" rx="150" ry="140" fill="url(#face)"/>
+  <path d="M214 256 q42 -22 84 0" stroke="#6E3F29" stroke-width="6" fill="none" stroke-linecap="round" opacity="0.45"/>
+
+  <!-- Augen -->
+  <g fill="#160f0b">
+    <ellipse cx="205" cy="304" rx="24" ry="28"/>
+    <ellipse cx="307" cy="304" rx="24" ry="28"/>
+  </g>
+  <circle cx="197" cy="294" r="7" fill="#ffffff" opacity="0.92"/>
+  <circle cx="299" cy="294" r="7" fill="#ffffff" opacity="0.92"/>
+
+  <!-- Schwarze Schnauze -->
+  <ellipse cx="256" cy="392" rx="88" ry="66" fill="url(#snout)"/>
+  <path d="M234 430 q22 30 44 0 Z" fill="#EFA396"/>
+  <ellipse cx="256" cy="360" rx="34" ry="24" fill="#0f0a07"/>
+  <ellipse cx="247" cy="352" rx="9" ry="5" fill="#6a5a50" opacity="0.55"/>
+
+  <!-- Doktorhut mit gelber (schwedischer) Quaste -->
+  <path d="M208 178 h96 v16 a48 20 0 0 1 -96 0 Z" fill="#1c1410"/>
+  <polygon points="256,96 358,152 256,208 154,152" fill="url(#hat)"/>
+  <polygon points="256,96 358,152 256,152 154,152" fill="#ffffff" opacity="0.06"/>
+  <path d="M256 152 Q322 150 320 178" stroke="#FECC02" stroke-width="5" fill="none" stroke-linecap="round"/>
+  <circle cx="320" cy="184" r="8" fill="#FECC02"/>
+  <circle cx="256" cy="152" r="9" fill="#FECC02"/>
+  <circle cx="253" cy="149" r="3" fill="#fff2b8"/>
+</svg>

@@ -42,12 +42,38 @@
   /* -------- State laden -------- */
   let customExams = A.loadFromStorage(storage, A.STORAGE_KEYS.customExams, []);
   let doneMap = A.loadFromStorage(storage, A.STORAGE_KEYS.doneMap, {});
+  let requestedSkin = A.loadFromStorage(storage, A.STORAGE_KEYS.skin, 'standard');
   // id des Termins, der gerade eine Bestätigungs-Nachfrage anzeigt (Abhaken/Rückgängig)
   let pendingConfirmId = null;
+
+  // Tages-Lernziele laden; an einem neuen Tag werden die Haken zurückgesetzt.
+  const todayStr = A.todayStamp(new Date());
+  let goals = A.loadFromStorage(storage, A.STORAGE_KEYS.goals, []);
+  const savedGoalsDate = A.loadFromStorage(storage, A.STORAGE_KEYS.goalsDate, null);
+  goals = A.resetGoalsForNewDay(goals, savedGoalsDate, todayStr);
+
+  // Die drei festen Staatsexamen in fester Reihenfolge -> steuern die Skin-Freischaltung.
+  const examIds = CONFIG.exams.map((e) => A.makeExamId(e.label, e.date));
+  // Anzahl bereits freigeschalteter Skins (um neue Freischaltungen zu erkennen)
+  let lastUnlockedCount = 0;
 
   function persist() {
     A.saveToStorage(storage, A.STORAGE_KEYS.customExams, customExams);
     A.saveToStorage(storage, A.STORAGE_KEYS.doneMap, doneMap);
+    A.saveToStorage(storage, A.STORAGE_KEYS.skin, requestedSkin);
+  }
+
+  function persistGoals() {
+    A.saveToStorage(storage, A.STORAGE_KEYS.goals, goals);
+    A.saveToStorage(storage, A.STORAGE_KEYS.goalsDate, todayStr);
+  }
+
+  function currentUnlocks() {
+    return A.computeExamUnlocks(doneMap, examIds);
+  }
+  function countUnlockedSkins() {
+    const u = currentUnlocks();
+    return A.SKIN_DEFS.filter((s) => !s.unlock || u[s.unlock]).length;
   }
 
   /* -------- Countdown + Prüfungsliste rendern -------- */
@@ -88,6 +114,14 @@
     timer.className = 'exam-timer';
     timer.id = `timer-${exam.id}`;
     card.appendChild(timer);
+
+    const dateLine = A.formatExamDate(exam.date);
+    if (dateLine) {
+      const dateEl = document.createElement('div');
+      dateEl.className = 'exam-date';
+      dateEl.textContent = dateLine;
+      card.appendChild(dateEl);
+    }
 
     // Abhak-Bereich
     const toggleRow = document.createElement('div');
@@ -136,11 +170,44 @@
     return card;
   }
 
+  const progressChip = document.getElementById('progressChip');
+  const progressDots = document.getElementById('progressDots');
+  const progressText = document.getElementById('progressText');
+
+  function renderProgress(list) {
+    const p = A.examProgress(list);
+    progressDots.innerHTML = '';
+    for (let i = 0; i < p.total; i++) {
+      const dot = document.createElement('span');
+      dot.className = 'pdot' + (i < p.done ? ' filled' : '');
+      progressDots.appendChild(dot);
+    }
+    if (p.total === 0) {
+      progressText.textContent = 'Trag deine Prüfungen ein — los geht’s! 🎓';
+    } else if (p.allDone) {
+      progressText.textContent = `Alle ${p.total} geschafft — du bist offiziell fertig! 🎓🏆`;
+    } else if (p.done === 0) {
+      progressText.textContent = `0 von ${p.total} geschafft — aber das ändert sich bald! 💪`;
+    } else {
+      progressText.textContent = `Geschafft: ${p.done} von ${p.total} Prüfungen 🎉`;
+    }
+    progressChip.classList.toggle('is-complete', p.allDone);
+  }
+
   function renderAll() {
     const list = A.buildExamList(CONFIG.exams, customExams, doneMap);
     countdownsEl.innerHTML = '';
     list.forEach((exam) => countdownsEl.appendChild(renderExamCard(exam)));
+    renderProgress(list);
+    applySkin();
+    if (!skinModal.hidden) renderSkinGrid();
     tickTimers();
+  }
+
+  /* -------- Skin auf Henry anwenden -------- */
+  function applySkin() {
+    const resolved = A.resolveSkin(requestedSkin, currentUnlocks());
+    dog.dataset.skin = resolved;
   }
 
   function tickTimers() {
@@ -165,9 +232,6 @@
       `;
     });
   }
-
-  renderAll();
-  setInterval(tickTimers, 1000);
 
   /* -------- Eigene Prüfung hinzufügen -------- */
   const addForm = document.getElementById('addExamForm');
@@ -196,29 +260,102 @@
     showQuote();
   });
 
-  /* -------- Sprüche -------- */
-  const QUOTES = [
-    "Du hast schon so viel gelernt — jetzt zeigst du es einfach nur noch.",
-    "Referendar:innen und Schüler:innen können sich schon auf dich freuen.",
-    "DOGNAME sagt: Wuff bedeutet auf Hundisch \"Du rockst das\"!",
-    "Ett Staatsexamen är bara en dag — dein Können ist von Dauer.",
-    "Tief durchatmen. Du bist vorbereiteter, als du gerade denkst.",
-    "Nicht perfekt sein müssen. Nur du selbst sein müssen — das reicht.",
-    "Jede Karteikarte, jede Nachtschicht zahlt sich jetzt aus.",
-    "Du wirst eine Lehrkraft, an die sich Kinder noch mit 30 erinnern.",
-    "Kurze Pause gefällig? Auch Profis brauchen Gassi-Runden — fika hilft auch.",
-    "Fehler sind erlaubt. Aufgeben nicht.",
-    "Lycka till! Stell dir vor, wie du nach der letzten Prüfung feierst. Genau dahin gehst du.",
-    "DOGNAME glaubt fest an dich. Und DOGNAME hat immer recht.",
-    "Du musst nicht alles wissen. Du musst nur zeigen, was du kannst.",
-    "Ruhig bleiben, Haltung bewahren, liefern — genau wie im Klassenzimmer.",
-    "Du fixar det! (Das heißt auf Schwedisch: Du schaffst das.)",
-  ];
+  /* -------- Tages-Lernziele -------- */
+  const goalForm = document.getElementById('goalForm');
+  const goalInput = document.getElementById('goalInput');
+  const goalsList = document.getElementById('goalsList');
+  const goalsCount = document.getElementById('goalsCount');
+  const goalsEmpty = document.getElementById('goalsEmpty');
 
+  function renderGoals() {
+    goalsList.innerHTML = '';
+    goals.forEach((g) => {
+      const li = document.createElement('li');
+      li.className = 'goal-item' + (g.done ? ' is-done' : '');
+      const cid = `goal-${g.id}`;
+
+      const cb = document.createElement('input');
+      cb.type = 'checkbox';
+      cb.className = 'goal-check';
+      cb.id = cid;
+      cb.checked = g.done;
+      cb.setAttribute('aria-label', `"${g.text}" als erledigt markieren`);
+      cb.addEventListener('change', () => {
+        goals = A.toggleGoal(goals, g.id);
+        persistGoals();
+        renderGoals();
+        const p = A.examProgress(goals);
+        if (p.allDone && p.total > 0) {
+          popBubble(`Alle Lernziele für heute geschafft! ${CONFIG.dogName} ist mega stolz auf dich. 🎉`);
+        }
+      });
+
+      const label = document.createElement('label');
+      label.className = 'goal-text';
+      label.setAttribute('for', cid);
+      label.textContent = g.text;
+
+      const del = document.createElement('button');
+      del.type = 'button';
+      del.className = 'goal-remove';
+      del.textContent = '✕';
+      del.setAttribute('aria-label', `"${g.text}" entfernen`);
+      del.addEventListener('click', () => {
+        goals = A.removeGoal(goals, g.id);
+        persistGoals();
+        renderGoals();
+      });
+
+      li.append(cb, label, del);
+      goalsList.appendChild(li);
+    });
+
+    const p = A.examProgress(goals);
+    if (p.total === 0) {
+      goalsCount.textContent = '';
+      goalsCount.classList.remove('is-complete');
+      goalsEmpty.hidden = false;
+    } else {
+      goalsCount.textContent = `${p.done}/${p.total} geschafft`;
+      goalsCount.classList.toggle('is-complete', p.allDone);
+      goalsEmpty.hidden = true;
+    }
+  }
+
+  goalForm.addEventListener('submit', (e) => {
+    e.preventDefault();
+    if (!goalInput.value.trim()) return;
+    const id = 'g' + Date.now().toString(36) + Math.random().toString(36).slice(2, 6);
+    goals = A.addGoal(goals, goalInput.value, id);
+    persistGoals();
+    goalInput.value = '';
+    renderGoals();
+  });
+
+  /* -------- Sprüche (Datenstruktur + Auswahl kommen aus app.js) --------
+     "Misch-Stapel": Alle Sprüche werden gemischt und der Reihe nach gezeigt.
+     Erst wenn der Stapel leer ist, wird neu gemischt — so wiederholt sich kein
+     Spruch, bevor nicht alle einmal dran waren. */
   const bubble = document.getElementById('bubble');
+  let quoteBag = [];
+  let lastQuoteText = null;
+
+  function nextQuote() {
+    if (quoteBag.length === 0) {
+      quoteBag = A.shuffle(A.QUOTES);
+      // Verhindern, dass direkt nach dem Neumischen derselbe Spruch wie zuletzt kommt.
+      if (quoteBag.length > 1 && quoteBag[quoteBag.length - 1].text === lastQuoteText) {
+        quoteBag.unshift(quoteBag.pop());
+      }
+    }
+    return quoteBag.pop();
+  }
+
   function showQuote() {
-    const raw = QUOTES[Math.floor(Math.random() * QUOTES.length)];
-    bubble.textContent = raw.replaceAll('DOGNAME', CONFIG.dogName);
+    const quote = nextQuote();
+    if (!quote) return;
+    lastQuoteText = quote.text;
+    bubble.textContent = quote.text.replaceAll('DOGNAME', CONFIG.dogName);
     bubble.classList.remove('pop');
     void bubble.offsetWidth;
     bubble.classList.add('pop');
@@ -258,14 +395,28 @@
   dog.addEventListener('click', pet);
   dog.addEventListener('keydown', (e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); pet(); } });
 
+  function popBubble(text) {
+    bubble.textContent = text;
+    bubble.classList.remove('pop');
+    void bubble.offsetWidth;
+    bubble.classList.add('pop');
+  }
+
   function celebrateExam(examLabel) {
     launchConfetti();
     dog.classList.add('happy');
     setTimeout(() => dog.classList.remove('happy'), 700);
-    bubble.textContent = `${CONFIG.dogName} dreht durch vor Stolz: "${examLabel}" ist geschafft! 🎉🎓`;
-    bubble.classList.remove('pop');
-    void bubble.offsetWidth;
-    bubble.classList.add('pop');
+    popBubble(`${CONFIG.dogName} dreht durch vor Stolz: "${examLabel}" ist geschafft! 🎉🎓`);
+
+    // Neue Skins freigeschaltet? -> Hinweis-Badge am Kleiderhaken + Nachricht
+    const nowCount = countUnlockedSkins();
+    if (nowCount > lastUnlockedCount) {
+      skinBtn.classList.add('has-new');
+      setTimeout(() => {
+        popBubble(`Neuer Skin für ${CONFIG.dogName} freigeschaltet! Tipp oben rechts auf den 🧥-Kleiderhaken. 🎁`);
+      }, 2600);
+    }
+    lastUnlockedCount = nowCount;
   }
 
   /* -------- Konfetti -------- */
@@ -284,6 +435,109 @@
   }
   document.getElementById('confettiBtn').addEventListener('click', launchConfetti);
 
-  // Erster Spruch beim Laden
+  /* -------- Skin-System: Kleiderhaken-Modal -------- */
+  const skinBtn = document.getElementById('skinBtn');
+  const skinModal = document.getElementById('skinModal');
+  const skinBackdrop = document.getElementById('skinBackdrop');
+  const skinClose = document.getElementById('skinClose');
+  const skinGrid = document.getElementById('skinGrid');
+
+  const SKIN_EMOJI = {
+    standard: '🎓', buecherwurm: '📖', pflanzen: '🌿', schweden: '🇸🇪',
+    bronze: '🥉', superheld: '🦸', lehrer: '👓', champion: '👑',
+  };
+
+  // Klont den echten Henry als kleines, statisches Vorschau-Männchen für eine Kachel.
+  function makeMiniDog(skinId) {
+    const mini = dog.cloneNode(true);
+    mini.removeAttribute('id');
+    mini.removeAttribute('role');
+    mini.removeAttribute('tabindex');
+    mini.removeAttribute('aria-label');
+    mini.classList.remove('happy');
+    mini.classList.add('mini');
+    mini.dataset.skin = skinId;
+    return mini;
+  }
+
+  function renderSkinGrid() {
+    const unlocks = currentUnlocks();
+    skinGrid.innerHTML = '';
+    A.SKIN_DEFS.forEach((def) => {
+      const unlocked = !def.unlock || Boolean(unlocks[def.unlock]);
+      const isActive = unlocked && A.resolveSkin(requestedSkin, unlocks) === def.id;
+
+      const tile = document.createElement('button');
+      tile.type = 'button';
+      tile.className = 'skin-tile'
+        + (isActive ? ' is-active' : '')
+        + (unlocked ? '' : ' is-locked');
+      tile.dataset.skin = def.id;
+      tile.setAttribute('aria-pressed', isActive ? 'true' : 'false');
+      if (!unlocked) tile.setAttribute('aria-disabled', 'true');
+
+      let badge;
+      if (!unlocked) badge = '<span class="tile-badge">🔒 gesperrt</span>';
+      else if (isActive) badge = '<span class="tile-badge">Aktiv</span>';
+      else badge = '<span class="tile-badge">Anziehen</span>';
+
+      tile.innerHTML = `
+        <span class="tile-emoji"></span>
+        <span class="tile-body">
+          <span class="tile-name">${def.label}</span>
+          <span class="tile-hint">${def.hint}</span>
+        </span>
+        ${badge}
+      `;
+
+      // Emoji-Slot füllen: freigeschaltet -> echter Mini-Henry im jeweiligen Skin,
+      // gesperrt -> Schloss (bleibt eine kleine Überraschung).
+      const slot = tile.querySelector('.tile-emoji');
+      if (unlocked) {
+        slot.classList.add('has-dog');
+        slot.appendChild(makeMiniDog(def.id));
+      } else {
+        slot.textContent = '🔒';
+      }
+
+      tile.addEventListener('click', () => {
+        if (!unlocked) {
+          popBubble(`Diesen Skin schaltest du frei: ${def.hint} 💪`);
+          return;
+        }
+        requestedSkin = def.id;
+        persist();
+        applySkin();
+        renderSkinGrid();
+        popBubble(`${CONFIG.dogName} trägt jetzt: ${def.label}! ${SKIN_EMOJI[def.id]}`);
+      });
+
+      skinGrid.appendChild(tile);
+    });
+  }
+
+  function openSkinModal() {
+    renderSkinGrid();
+    skinModal.hidden = false;
+    skinBtn.classList.remove('has-new');
+    skinClose.focus();
+  }
+  function closeSkinModal() {
+    skinModal.hidden = true;
+    skinBtn.focus();
+  }
+  skinBtn.addEventListener('click', openSkinModal);
+  skinClose.addEventListener('click', closeSkinModal);
+  skinBackdrop.addEventListener('click', closeSkinModal);
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape' && !skinModal.hidden) closeSkinModal();
+  });
+
+  /* -------- Initialisierung (nachdem alle Elemente/Handler bereit sind) -------- */
+  lastUnlockedCount = countUnlockedSkins();
+  renderAll();
+  renderGoals();
+  persistGoals(); // sichert ggf. den zurückgesetzten Tages-Stand
+  setInterval(tickTimers, 1000);
   showQuote();
 })();

@@ -1,24 +1,36 @@
 # 🎓🐾 Du schaffst das, Celine! — Motivations-App fürs Staatsexamen
 
-Eine interaktive Web-App fürs Staatsexamen (Lehramt): Countdown zu allen drei
-Prüfungsterminen, eine animierte französische Bulldogge ("Henry") zum
-Antippen, wechselnde Mutmach-Sprüche (mit Schweden-Prise 🇸🇪), ein
+Eine interaktive Web-App fürs Staatsexamen (Lehramt): Countdown **mit
+ausgeschriebenem Datum** zu allen drei Prüfungsterminen, eine animierte
+französische Bulldogge ("Henry") zum Antippen — die man über einen
+**Kleiderhaken mit 8 Skins** einkleiden kann (4 frei, 4 werden fürs Bestehen
+der Prüfungen freigeschaltet), wechselnde Mutmach-Sprüche (45+ Stück, ohne schnelle Wiederholung, mit
+Schweden-Prise 🇸🇪 und ein paar liebevollen Insider-Anspielungen), eine
+Gesamt-Fortschrittsanzeige, eine **Tages-Lernziele-Liste**, ein
 "Pfoten-Power-Meter" mit Konfetti-Feiermodus — und die Möglichkeit, bestandene
 Prüfungen abzuhaken sowie eigene, künftige Prüfungstermine einzutragen.
 
-Läuft direkt im Browser (auch auf iPhone/iPad), kein Server, kein Build nötig.
+Läuft direkt im Browser (auch auf iPhone/iPad), kein Server, kein Build nötig —
+und lässt sich als **App zum Home-Bildschirm** hinzufügen (funktioniert dann
+sogar offline).
 
 ---
 
 ## Dateien in diesem Projekt
 
 ```
-index.html   — Struktur der Seite
-style.css    — komplettes Design (Cozy-Schule + Schweden-Deko)
-app.js       — reine Logik (Countdown, Prüfungen verwalten, Speichern) — GETESTET
-ui.js        — verbindet die Logik mit der Seite (Klicks, Rendering)
-tests/       — automatisierte Tests für app.js
-README.md    — diese Anleitung
+index.html          — Struktur der Seite
+style.css           — komplettes Design (Cozy-Schule + Schweden-Deko)
+app.js              — reine Logik (Countdown, Prüfungen, Sprüche, Skins, Lernziele) — GETESTET
+ui.js               — verbindet die Logik mit der Seite (Klicks, Rendering)
+tests/              — automatisierte Tests für app.js
+manifest.json       — App-Infos (Name, Icon, Farben) fürs "Zum Home-Bildschirm"
+sw.js               — Service Worker: macht die App offline-fähig
+icon-192/512.png,
+apple-touch-icon.png — App-Icons (Henry-Gesicht) für den Home-Bildschirm
+icon.svg            — Quell-Grafik des Icons (aus ihr sind die PNGs erzeugt)
+README.md           — diese Anleitung
+ROADMAP.md          — Umgesetztes + Ideen für später
 ```
 
 `app.js` enthält bewusst **keine** Bildschirm-Elemente, nur reine Funktionen
@@ -78,6 +90,62 @@ gültig sein, keine doppelten Einträge) — bei einem Fehler erscheint eine
 kurze, verständliche Meldung statt eines Absturzes. Eigene Prüfungen lassen
 sich über das ✕ neben dem Titel auch wieder löschen (mit Sicherheits-Nachfrage).
 
+### 📅 Datum + Countdown
+Unter jedem Countdown steht jetzt zusätzlich das ausgeschriebene Datum
+(z. B. "22.07.2026, 08:00 Uhr"), damit auf einen Blick klar ist, welcher
+Termin gemeint ist.
+
+### 🎉 Gesamt-Fortschritt
+Direkt unter der Überschrift zeigt ein kleiner Chip mit Punkten, wie viele
+Prüfungen schon geschafft sind ("Geschafft: 1 von 3"). Sind alle geschafft,
+wird er golden und feiert mit.
+
+### 🧥 Henrys Kleiderhaken (Skin-System)
+Oben rechts in der Hund-Szene öffnet der Kleiderhaken (🧥) ein Panel mit
+8 Outfits für Henry:
+
+- **Immer verfügbar:** Standard-Henry (Doktorhut), Bücherwurm (Lesebrille +
+  Buch), Pflanzen-Power (Blätterkranz + Ranke), Schweden-Modus (blau-gelbes
+  Halstuch + Dalapferd).
+- **Freigeschaltet durchs Bestehen der Prüfungen:** Bronze-Genie (nach dem
+  1. Examen), Superheld Henry (nach dem 2., mit Umhang + Maske), Lehrer Henry
+  (nach dem 3., mit Fliege + Brille + Zeigestock) und als großes Finale
+  Champion Henry (wenn alle drei geschafft sind: Talar, goldene Krone,
+  Glitzer-Aura).
+
+Gesperrte Skins zeigen ihre Freischalt-Bedingung an. Der gewünschte Skin wird
+gespeichert — schaltet man eine Prüfung wieder ab, fällt Henry vorübergehend
+auf den Standard zurück und trägt das gewünschte Outfit automatisch wieder,
+sobald die Prüfung erneut als bestanden markiert ist.
+
+### ✨ Mehr Sprüche, ohne schnelle Wiederholung
+45+ Motivationssprüche (statt vorher 15). Sie werden über einen „Misch-Stapel"
+gezeigt: Erst wenn wirklich alle einmal dran waren, wird neu gemischt — so
+wiederholt sich kein Spruch zu früh, und derselbe kommt nie zweimal direkt
+hintereinander. Darunter sind — statistisch selten, ~10 % — ein paar liebevoll
+neckende Insider-Sprüche.
+
+### 📝 Tages-Lernziele
+Unter den Prüfungen gibt es eine kleine Checkliste „Heutige Lernziele". Celine
+kann eintragen, was sie sich für den Tag vornimmt, einzelne Punkte abhaken oder
+löschen. Ein Zähler zeigt den Tagesfortschritt („1/2 geschafft"), und wenn alle
+Ziele erledigt sind, feiert Henry kurz mit. **Jeden neuen Tag** werden die Haken
+automatisch zurückgesetzt (die eingetragenen Ziel-Texte bleiben erhalten, damit
+wiederkehrende Ziele nicht neu getippt werden müssen). Alles lokal gespeichert.
+
+### 🐶 Mini-Henry im Kleiderhaken
+Im Skin-Panel zeigt jede freigeschaltete Kachel einen echten Mini-Henry im
+jeweiligen Outfit (statt nur eines Emojis) — so sieht man auf einen Blick, wie
+Henry damit aussieht. Gesperrte Skins bleiben mit 🔒 eine kleine Überraschung.
+
+### 📲 Als App installieren (PWA / Offline)
+Öffnet man den GitHub-Pages-Link auf dem iPhone in **Safari** → Teilen-Symbol →
+„Zum Home-Bildschirm", landet die App mit eigenem **Henry-Icon** auf dem
+Startbildschirm und öffnet im Vollbild wie eine echte App. Nach dem ersten
+Öffnen funktioniert sie dank Service Worker (`sw.js`) **auch offline**. Wichtig:
+Das klappt nur über den `https`-Link von GitHub Pages, nicht per lokalem
+Doppelklick.
+
 ---
 
 ## 3. iPhone & iPad
@@ -106,8 +174,9 @@ selben Ordner liegen, da sie sich gegenseitig referenzieren.)
 
 ## 5. Automatisierte Tests ausführen
 
-Die Logik in `app.js` (Countdown-Berechnung, Prüfungen hinzufügen/entfernen,
-Abhaken, Speichern) ist mit **26 automatisierten Tests** abgedeckt
+Die Logik in `app.js` (Countdown-Berechnung, Datum-Formatierung, Prüfungen
+hinzufügen/entfernen, Abhaken, Speichern, Sprüche-Auswahl, Fortschritt und das
+komplette Skin-Freischalt-System) ist mit **60 automatisierten Tests** abgedeckt
 (Node.js' eingebauter Testrunner, keine Zusatz-Installation nötig).
 
 Voraussetzung: [Node.js](https://nodejs.org) ab Version 18.
@@ -116,14 +185,19 @@ Voraussetzung: [Node.js](https://nodejs.org) ab Version 18.
 node --test
 ```
 
-Erwartete Ausgabe am Ende: `# pass 26` und `# fail 0`.
+Erwartete Ausgabe am Ende: `# pass 1` (eine Test-Datei) mit **60 grünen
+Unter-Tests** und `# fail 0`.
 
 Getestet werden u. a.:
 - Countdown-Berechnung (Tage/Std/Min/Sek, auch für bereits vergangene Termine)
+- Datum-Formatierung ("22.07.2026, 08:00 Uhr", inkl. ungültiger Eingaben)
 - Zusammenführen von festen + eigenen Prüfungen inkl. Sortierung nach Datum
 - Validierung neuer Prüfungen (leerer Name, ungültiges Datum, Duplikate)
 - Hinzufügen/Entfernen eigener Prüfungen, ohne bestehende Daten zu verändern
-- Abhaken/Rückgängig-Machen des "bestanden"-Status
+- Abhaken/Rückgängig-Machen des "bestanden"-Status + Gesamt-Fortschritt
+- Sprüche-Auswahl (deterministisch testbar) & Insider-Anteil bleibt ≤ 10 %
+- Skin-Freischaltung (welche Prüfung schaltet welchen Skin frei) und der
+  automatische Rückfall auf "Standard", wenn ein Skin (noch) gesperrt ist
 - Speichern & Laden aus dem Browser-Speicher, inkl. Umgang mit kaputten Daten
 - Ein kompletter End-to-End-Ablauf (Prüfung eintragen → abhaken → rückgängig machen)
 
@@ -132,8 +206,11 @@ Getestet werden u. a.:
 ## 6. Auf GitHub Pages veröffentlichen
 
 1. Neues GitHub-Repository erstellen (z. B. `staatsexamen-power`).
-2. Alle Dateien aus diesem Ordner hochladen (`index.html`, `style.css`,
-   `app.js`, `ui.js`, optional `README.md` und `tests/`).
+2. Alle Dateien aus diesem Ordner hochladen. **Wichtig für die App-/Offline-
+   Funktion:** neben `index.html`, `style.css`, `app.js`, `ui.js` unbedingt auch
+   `manifest.json`, `sw.js` sowie `icon-192.png`, `icon-512.png` und
+   `apple-touch-icon.png` mit hochladen. `README.md`, `ROADMAP.md`, `icon.svg`
+   und `tests/` sind optional (schaden aber nicht).
 3. Im Repo zu **Settings → Pages** gehen.
 4. Unter "Build and deployment" → **Source: Deploy from a branch** wählen,
    Branch `main` und Ordner `/ (root)` auswählen, dann **Save**.
